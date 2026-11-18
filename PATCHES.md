@@ -69,3 +69,25 @@ projection、任务板 CAS 与依赖 DAG，均为官方原样。
 两者都用 `ctx.subagents.listDescendants()` 的投影条目（形状统一：kind/parentId/depth/activity），
 `children` 只是按 depth 过滤；`listChildren()` 返回的是原始 catalog 条目（没有 kind/depth），
 不宜直接混用。
+
+## 8. 委派深度（maxDepth）
+
+`team` 域的 `startActivation` 原本完全不传 `maxDepth`，等于绕过了宿主/工具层的深度上限。
+现在：
+
+* 域：`spawnAdmitted` 里取 `request.maxDepth ?? ctx.subagents.resolveMaxDepth(undefined)`，
+  随激活请求下发；
+* 工具：`spawn_teammate` 新增可选 `max_depth`（绝对深度上限，省略则用宿主
+  `@deepseek-ai/dsh-subagent` 的 `maxDepth` 配置，默认 1）。
+
+真正的"能派几层"由**发起方**的 `tool-subagent` 行配置或宿主 `subagent` 行配置决定：
+`resolveMaxDepth(configured)` = 行配置 ?? 宿主配置（默认 1）。宿主配置可在 profile 补丁里改：
+
+```yaml
+- id: subagent
+  name: "@deepseek-ai/dsh-subagent"
+  config:
+    maxDepth: 3
+```
+
+另：投递到某代理需要它的**直接父级在场**；父级已结束时先唤醒父级，再由它转给自己的子代理。
