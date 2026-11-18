@@ -1,0 +1,10 @@
+# Mounts the forked Agent Teams domain + tools. Legacy subagent rows stay enabled:
+# the Team tools register per member scope and shadow the same-named globals there.
+- insert:
+    - id: lineage-agent-team
+      name: '@y916/dsh-lineage-teams'
+      config:
+        maxMembers: 16
+        maxTasks: 256
+        maxMessageBytes: 65536
+        disposalTimeoutMs: 5000

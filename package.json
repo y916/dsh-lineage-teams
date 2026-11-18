@@ -1,0 +1,27 @@
+{
+  "name": "@y916/dsh-lineage-teams",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent Teams fork: named teammates with agent-preset / LLM-route selection, broadcast send_message({targets}) and a shared task board.",
+  "main": "./lib/index.mjs",
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "PATCHES.md"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "agent-team",
+    "subagent",
+    "multi-agent"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
