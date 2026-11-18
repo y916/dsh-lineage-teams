@@ -60,3 +60,12 @@ projection、任务板 CAS 与依赖 DAG，均为官方原样。
 
 因此两套可以并存：团队通道（名字、群发、任务板、wait_agent）与 legacy 通道
 （`subagent` + `agent_id`)都能用。
+
+## 7. `list_agents` 增加可选 `scope`
+
+* `scope: "all"`（默认）：团队成员 + 整棵 legacy 子代理树；
+* `scope: "children"`：团队成员 + 仅直接子代理（`depth === 1`）。
+
+两者都用 `ctx.subagents.listDescendants()` 的投影条目（形状统一：kind/parentId/depth/activity），
+`children` 只是按 depth 过滤；`listChildren()` 返回的是原始 catalog 条目（没有 kind/depth），
+不宜直接混用。
