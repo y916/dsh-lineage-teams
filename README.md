@@ -4,7 +4,9 @@ Agent Teams 的 fork：保留官方全部能力（耐久名册、共享任务板
 
 1. `spawn_teammate` 可以指定 **agent 预设**、LLM `provider` / `model` / `reasoning_effort`、`cwd`；
 2. `send_message({ targets: ["a", "b"], message })` 支持群发（单个也传数组）；
-3. 注入给队友/Lead 的 `team:identity` 提示写明：名字、父级 id、组员名单与 `targets` 契约。
+3. 注入给队友/Lead 的 `team:identity` 提示写明：名字、父级 id、组员名单与 `targets` 契约；
+4. 兼容 legacy 子代理：`targets` 里可以直接写 agent id（`subagent` 派出的子代理），
+   `list_agents` 会把它们以 `role: "child"` 一并列出。
 
 ## 安装
 
