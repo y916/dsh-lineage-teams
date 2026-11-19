@@ -1,6 +1,6 @@
 {
   "name": "@y916/dsh-lineage-teams",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Agent Teams fork: named teammates with agent-preset / LLM-route selection, broadcast send_message({targets}) and a shared task board.",

@@ -6,7 +6,11 @@ Agent Teams 的 fork：保留官方全部能力（耐久名册、共享任务板
 2. `send_message({ targets: ["a", "b"], message })` 支持群发（单个也传数组）；
 3. 注入给队友/Lead 的 `team:identity` 提示写明：名字、父级 id、组员名单与 `targets` 契约；
 4. 兼容 legacy 子代理：`targets` 里可以直接写 agent id（`subagent` 派出的子代理），
-   `list_agents` 会把它们以 `role: "child"` 一并列出（默认整棵树，可用 `scope: "children"` 只看直接子代理）。
+   `list_agents` 会把它们以 `role: "child"` 一并列出（默认整棵树，可用 `scope: "children"` 只看直接子代理）；
+5. **非团队子代理也有交流指引**：`subagent` / `workflow` / 队友派出的子代理，每步都会注入
+   一段 runtime context——父级 agent id、`list_agents` 的用法、`send_message` 的别名约定；
+6. `send_message` 支持 `"lead"` / `"parent"` 别名：`"parent"` 是你（或你所在子树的）直接父级，
+   `"lead"` 是根会话/团队负责人；非成员也可以用它们在不知道任何 id 的情况下回报。
 
 ## 安装
 
@@ -37,6 +41,30 @@ bundle 只挂 **域服务**（名册、任务板、journal）。模型可见的�
 三件套 `send_message` / `list_agents` / `interrupt_agent` 不在这行开关里：它们由 bundle
 的宿主级替换器负责，**任何预设只要自己声明了这三个工具，拿到的就是本 fork 的版本**
 （`targets` 群发、整棵可达树、同根投递），无需挂 `.../tools`。
+
+## 子代理（非团队成员）的提示与可达性
+
+非团队成员没有名册，fork 会给它们补一套等价能力：
+
+* **每步注入的 runtime context**（`lineage:subagent-guidance`，仅当该 agent
+  声明了 `send_message` / `list_agents` 时）：
+
+  ```
+  你是子代理，父级智能体（parent agent）是「<parent session id>」。
+  你可以用 list_agents 查看同一根会话下的智能体：父级、兄弟子代理与同组队友（若有），…
+  你可以用 send_message 与父级、兄弟子代理或同组队友（若有）交流：…
+  ```
+
+  它跟着 `subagent:delegation` 同一 order 渲染，**每步重算**，不写进创建时的任务消息，
+  因此不会污染任务本身，也不会被 compaction 挤掉。
+* **`list_agents`（非成员）**：父链（根为 `role: "lead"`，其余 `role: "parent"`）+
+  同一根会话下的整棵子代理树（`role: "child"`，`target` 即 agent id）；
+  `scope: "children"` 只保留自己的直接子代理。状态取自投影条目的 `activity`
+  （旧实现读 `entry.status`，永远显示 `inactive`）。
+* **`send_message`**：成员沿用团队名册；非成员按 agent id 走同根投递。两种身份都接受
+  `"parent"` / `"lead"` 别名（见上）。广播会逐个投递，`failed` 里保留失败原因。
+* **`interrupt_agent`**：Lead 按名字中断队友（其他成员按名字调用会被拒绝），任何成员都可以
+  用 agent id 中断自己的直接子代理/后代；支持 `agent_id` 简写。
 
 ## 与上游的差异
 

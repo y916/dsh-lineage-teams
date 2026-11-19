@@ -141,3 +141,47 @@ projection、任务板 CAS 与依赖 DAG，均为官方原样。
   **成员**，且只在挂了该行的预设里生效。
 * legacy 子代理（`subagent` 派出的）沿用父级预设：三件套随宿主替换生效，团队专用工具
   不生效。
+
+## 12. 非团队子代理的交流指引、别名与列表修复
+
+### 12.1 子代理 runtime context（`lineage:subagent-guidance`）
+
+宿主级替换器在安装三件套时，给**非团队、且有父级**的 agent 额外注册一段
+`systemPrompt.context`（order 取 `SUBAGENT_DELEGATION`，每步重算）：
+
+* 父级 agent id（`session.header.parentSession`）；
+* `list_agents` 能看到哪些智能体、`scope` 的含义；
+* `send_message` 的 `"parent"` / `"lead"` 别名与多目标群发；
+* 共享工作空间但不共享对话/工具输出/推理；发送不结束本轮；最终结果仍作为回复返回。
+
+只在该 agent 的预设**确实声明**了 `send_message` / `list_agents` 时注入，避免提示里出现
+它没有的工具；`interrupt_agent` 同理。这样也补上了上游"adjacent send_message"注入在
+fork 替换后失效的问题（替换版没有打内部标记，标准引导不会追加）。
+
+### 12.2 别名
+
+`send_message` 的 `targets` 现在接受：
+
+* `"lead"`：团队成员 → Team 服务按 `lead` 解析；非成员 → 上溯到根会话 id；
+* `"parent"`：队友 → Team Lead（`lead`）；非成员 → 直接父级 id；Lead/根会话调用报错。
+
+其余值仍按成员名（成员）或 agent id（同根投递）解析。
+
+### 12.3 `list_agents` 修复
+
+* 成员：名册 + 整棵根会话子代理树（`scope: "children"` 时只保留 `parentId === caller.id`）；
+* 非成员：父链（最近优先，反转后展示）+ 根会话下的整棵树，排除自己与祖先；
+* 状态改用投影条目的 `activity`（原来误读 `entry.status`，永远 `inactive`）；
+* 根目录读不到时回退到自己的子树，而不是直接抛错。
+
+### 12.4 `interrupt_agent`
+
+* 描述改为"Lead 按名字中断队友 / 任何成员按 id 中断自己的子代理"，不再对所有人宣称 Lead only；
+* 非 Lead 按名字中断队友会明确报错，而不是落到 `subagents.interrupt("名字")`；
+* 支持 `agent_id` 简写；团队路径返回值统一为 `{ accepted, target, previousStatus? }`。
+
+### 12.5 `team:identity` 文案
+
+队友：可联系父级、任意组员**或其他智能体**（同根子代理），`"lead"`/`"parent"` 都指父级，
+也可以直接写组员名或 agent id。Lead（根会话）使用单独的文案，不再声称"父级是它自己"。
+成员列表改为"含你共 N 人"，并说明名单会变化、以 `list_agents` 为准。
