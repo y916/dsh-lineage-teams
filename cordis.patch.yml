@@ -1,5 +1,7 @@
-# Mounts the forked Agent Teams domain + tools. Legacy subagent rows stay enabled:
-# the Team tools register per member scope and shadow the same-named globals there.
+# Mounts the forked Agent Teams DOMAIN (service + journal) as the one Host singleton.
+# The model-facing tools are a separate plugin — `@y916/dsh-lineage-teams/tools` —
+# that each Agent Preset mounts explicitly, the same opt-in shape as the built-in
+# delegation rows. A preset without that row gets no Team tools and no Team prompt.
 - insert:
     - id: lineage-agent-team
       name: '@y916/dsh-lineage-teams'

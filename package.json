@@ -23,5 +23,10 @@
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
+  },
+  "exports": {
+    ".": "./lib/index.mjs",
+    "./tools": "./lib/team-tools.mjs",
+    "./package.json": "./package.json"
   }
 }

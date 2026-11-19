@@ -113,3 +113,27 @@ projection、任务板 CAS 与依赖 DAG，均为官方原样。
 非成员调用时按"同根会话 + 需要时中转"的路径投递。
 
 同时 `deliverUnderRoot` 的发送者根会话解析也改为沿会话存储上溯，祖先已结算也能判定。
+
+## 11. 工具改为显式声明（与内置插件同一开关形状）
+
+原来的 bundle 在宿主挂一次，然后把团队工具塞进每个 agent。现在拆成两层，和
+`tool-subagent-control` 这类内置行的用法一致：
+
+* **bundle**（`@y916/dsh-lineage-teams`）只挂域服务 `TeamService`（名册/任务板/journal）；
+* **工具** 是独立插件 `@y916/dsh-lineage-teams/tools`，预设要在自己的 `plugins` 里
+  显式写一行才会加载：
+
+```yaml
+- id: lineage-team-tools
+  name: "@y916/dsh-lineage-teams/tools"
+  config: { interrupt: true }
+```
+
+* 插件按作用域过滤：只给**挂载该行的预设**所组合出的 agent 安装（`scopeOf(ctx)` 的
+  子树），其他预设的 agent 完全不受影响。未声明 = 没有团队工具、没有 `team:policy` /
+  `team:identity`。
+* 三件套 `send_message` / `list_agents` / `interrupt_agent` 只在 agent 的组合**已经声明**
+  同名工具时注册（覆盖内置实现）；没声明就不注入。其余 6 个团队专用工具（`spawn_teammate`、
+  `wait_agent`、`team_task_*`）只装给成员。
+* legacy 子代理（`subagent` 派出的）沿用父级预设，因此同样拿到三件套替换，但不拿到
+  团队专用工具与提示段落。

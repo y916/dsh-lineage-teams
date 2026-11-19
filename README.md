@@ -20,7 +20,20 @@ dsh plugin --profile web add github:y916/dsh-lineage-teams
 dsh plugin --profile web add /path/to/dsh-lineage-teams
 ```
 
-安装后每个根会话即隐式 Team Lead；用 `spawn_teammate` 建队友，用 `send_message({targets})` 互通。
+bundle 只挂 **域服务**（名册、任务板、journal）。模型可见的团队工具是独立插件
+`@y916/dsh-lineage-teams/tools`，**由预设显式声明**——和内置的 `tool-subagent-control`
+等行同样的开关语义：
+
+```yaml
+- id: lineage-team-tools
+  name: "@y916/dsh-lineage-teams/tools"
+  config:
+    interrupt: true          # 可选，默认 true
+```
+
+声明了这一行的预设：它的所有 agent 都拿到 9 个团队工具（成员）或 3 个替换工具
+（legacy 子代理）；`send_message` / `list_agents` / `interrupt_agent` 会覆盖同名的
+内置工具。**没有声明该行的预设，一个团队工具与团队提示段落都没有。**
 
 ## 与上游的差异
 
