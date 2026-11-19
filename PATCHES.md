@@ -132,8 +132,12 @@ projection、任务板 CAS 与依赖 DAG，均为官方原样。
 * 插件按作用域过滤：只给**挂载该行的预设**所组合出的 agent 安装（`scopeOf(ctx)` 的
   子树），其他预设的 agent 完全不受影响。未声明 = 没有团队工具、没有 `team:policy` /
   `team:identity`。
-* 三件套 `send_message` / `list_agents` / `interrupt_agent` 只在 agent 的组合**已经声明**
-  同名工具时注册（覆盖内置实现）；没声明就不注入。其余 6 个团队专用工具（`spawn_teammate`、
-  `wait_agent`、`team_task_*`）只装给成员。
-* legacy 子代理（`subagent` 派出的）沿用父级预设，因此同样拿到三件套替换，但不拿到
-  团队专用工具与提示段落。
+* 三件套 `send_message` / `list_agents` / `interrupt_agent` **不在这个插件里**：它们由
+  bundle 的宿主级替换器（`lineage-team-replacements`）负责——只要某个 agent 的组合
+  **已经声明**了同名工具，就换成 fork 版本；没声明就一个也不加。因此没挂
+  `@y916/dsh-lineage-teams/tools` 的预设（例如 `cordis`、`minimal`）也会得到修改版的
+  三件套（前提是它自己声明了 `tool-subagent-control`），但拿不到团队专用工具。
+* 其余 6 个团队专用工具（`spawn_teammate`、`wait_agent`、`team_task_*`）与两段提示只装给
+  **成员**，且只在挂了该行的预设里生效。
+* legacy 子代理（`subagent` 派出的）沿用父级预设：三件套随宿主替换生效，团队专用工具
+  不生效。

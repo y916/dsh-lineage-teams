@@ -31,9 +31,12 @@ bundle 只挂 **域服务**（名册、任务板、journal）。模型可见的�
     interrupt: true          # 可选，默认 true
 ```
 
-声明了这一行的预设：它的所有 agent 都拿到 9 个团队工具（成员）或 3 个替换工具
-（legacy 子代理）；`send_message` / `list_agents` / `interrupt_agent` 会覆盖同名的
-内置工具。**没有声明该行的预设，一个团队工具与团队提示段落都没有。**
+声明了这一行的预设：成员 agent 拿到 6 个团队专用工具 + 两段团队提示；**没有声明该行的
+预设，一个团队专用工具、一段团队提示都没有。**
+
+三件套 `send_message` / `list_agents` / `interrupt_agent` 不在这行开关里：它们由 bundle
+的宿主级替换器负责，**任何预设只要自己声明了这三个工具，拿到的就是本 fork 的版本**
+（`targets` 群发、整棵可达树、同根投递），无需挂 `.../tools`。
 
 ## 与上游的差异
 
