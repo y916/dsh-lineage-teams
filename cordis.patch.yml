@@ -1,12 +1,9 @@
-# Mounts the forked Agent Teams DOMAIN (service + journal) as the one Host singleton.
-# The model-facing tools are a separate plugin — `@y916/dsh-lineage-teams/tools` —
-# that each Agent Preset mounts explicitly, the same opt-in shape as the built-in
-# delegation rows. A preset without that row gets no Team tools and no Team prompt.
+# Mounts the thin messaging/guidance increment as one Host row.
+#
+# It replaces nothing structural: the shipped `agent-team` / `tool-agent-team`
+# rows own the team model (named, multi-level subagents; task board; wait_agent;
+# interrupt_agent). This plugin only shadows `send_message` per Agent where the
+# composition already declares one, and adds a single prompt context.
 - insert:
-    - id: lineage-agent-team
+    - id: lineage-teams
       name: '@y916/dsh-lineage-teams'
-      config:
-        maxMembers: 16
-        maxTasks: 256
-        maxMessageBytes: 65536
-        disposalTimeoutMs: 5000

@@ -1,9 +1,9 @@
 {
   "name": "@y916/dsh-lineage-teams",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Agent Teams fork: named teammates with agent-preset / LLM-route selection, broadcast send_message({targets}) and a shared task board.",
+  "description": "Thin increment over the DSH Agent Teams model (0.2.2-rc.2+): broadcast send_message plus contact/completion guidance for delegated agents.",
   "main": "./lib/index.mjs",
   "files": [
     "lib",
@@ -26,7 +26,6 @@
   },
   "exports": {
     ".": "./lib/index.mjs",
-    "./tools": "./lib/team-tools.mjs",
     "./package.json": "./package.json"
   }
 }
