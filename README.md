@@ -82,6 +82,9 @@ bundle 只挂一行宿主插件（`lineage-teams`）。它**不注入任何工�
 `send_message` 时，用同名定义遮蔽它、并用同名定义遮蔽 `subagent`；没有声明 `send_message` 的预设不受影响。
 `subagent_fork` 的禁用按 Agent scope 逐一生效。
 
+热更新（0.3.0 → 0.4.0）时，0.3.0 留下的 `send_message` 遮蔽定义会被 0.4.0 就地接管；仍建议升级后重启
+profile 或开新会话，以重建已有 Agent 的 scope。
+
 ## 要求
 
 - DSH >= `0.2.2-rc.2`（`0.2.2-rc.1` 及更早的 `@deepseek-ai/dsh-subagent/internal` 与

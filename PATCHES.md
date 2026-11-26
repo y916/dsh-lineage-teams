@@ -37,6 +37,13 @@ Cordis 的 scoped tool 就近遮蔽才是受支持的做法（与 0.3.0 的 `sen
 遮蔽会带来一个上游副作用：`tool-subagent` 的 `tool:subagent` section 按定义身份判定，遮蔽后不再输出
 委派建议；本版用 `lineage:delegation` 复述同等内容（去掉 `subagent_fork`）。
 
+### 热更新迁移（0.3.0 → 0.4.0）
+
+0.3.0 注册 `send_message` 遮蔽时没有登记卸载 disposer，热更新会把它留在已有 Agent 的 scope 里，
+且其函数体闭包着已停用的插件 context（调用时报 `cannot get required service "subagents" in inactive context`）。
+0.4.0 识别这种遗留定义（同名 broadcast `send_message`）后就地换入新实例的实现并接管；
+0.4.0 起自己的注册会在卸载时释放，后续升级不再留下残骸。仍建议升级后重启 profile 以重建 scope。
+
 ### 验证
 
 - `node test/smoke.mjs`（新增 idle 计数、边界、遮蔽描述与拒绝、fork guard、wiring 断言）。

@@ -19,6 +19,7 @@ const {
   forkGuard,
   guidanceText,
   idleBudgetViolation,
+  isLegacySendMessage,
   isSubagentShadow,
   subagentLoad,
   IDLE_REUSE_RULE,
@@ -356,6 +357,35 @@ console.log('ok 1 target merging')
   assert.equal(forkGuard({ name: 'subagent' }), undefined)
   assert.equal(forkGuard({ name: 'send_message' }), undefined)
   console.log('ok 9 fork guard')
+}
+
+// ---------------------------------------------------------------------------
+// 10. Legacy send_message shadow detection (hot update from 0.3.0)
+// ---------------------------------------------------------------------------
+
+{
+  const legacy = {
+    name: 'send_message',
+    parameters: {
+      type: 'object',
+      properties: { agent: { type: 'string' }, targets: { type: 'array' }, message: { type: 'string' } },
+      required: ['message'],
+    },
+  }
+  const upstream = {
+    name: 'send_message',
+    parameters: {
+      type: 'object',
+      properties: { agent: { type: 'string' }, message: { type: 'string' } },
+      required: ['agent', 'message'],
+    },
+  }
+  assert.equal(isLegacySendMessage(legacy), true)
+  assert.equal(isLegacySendMessage(upstream), false, 'upstream single-target contract is never adopted')
+  assert.equal(isLegacySendMessage({ name: 'subagent', parameters: legacy.parameters }), false)
+  assert.equal(isLegacySendMessage(undefined), false)
+  assert.equal(isLegacySendMessage({ name: 'send_message', parameters: {} }), false)
+  console.log('ok 10 legacy shadow detection')
 }
 
 console.log('SMOKE TEST PASSED')
