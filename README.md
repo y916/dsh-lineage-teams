@@ -152,5 +152,5 @@ DSH_INSTALL_ROOT=/path/to/dsh-install node test/smoke.mjs
 0.2.x 的 fork 曾 vendor 上游 `agent-team` 与 `tool-agent-team`（约 2900 行），并替换三件套工具。
 那套实现依赖 `@deepseek-ai/dsh-subagent/internal`（`steerHostSubagentPrompt`）与
 `ctx.agentTeams` 的创建/通信 API，在 0.2.2-rc.2 起全部消失。0.3.0 起改成本插件只做增量；
-0.4.0 加入固定一半阈值的子代理预算；0.5.0 改为可配置的两个上限 + 三个差异豁免，并加入浏览器设置卡。
+0.4.0 加入固定一半阈值的子代理预算；0.5.0 改为可配置的两个上限 + 三个差异豁免，并加入浏览器设置卡；0.5.1 让默认导出携带 `Config`，使 Loader 暴露设置命名空间。
 旧补丁清单已归档到 git 历史，迁移说明见 [PATCHES.md](./PATCHES.md)。

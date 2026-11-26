@@ -1,3 +1,12 @@
+# 0.5.1：修正设置命名空间的注册
+
+基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`。
+
+Cordis Loader 把插件模块归一化为 `exports.default ?? exports`，因此只用命名导出携带 `Config` 时，
+默认插件对象会让 Loader 看不到 schema，设置命名空间（`lineage-teams`）不会出现在 `dsh-settings` 的
+describe 中，浏览器设置卡会显示不可用。0.5.1 把 `Config` 放进默认导出（`export default { name, inject,
+Config, apply }`），并加测试断言默认导出与命名导出的 `Config` 是同一个 schema。
+
 # 0.5.0：可配置的子代理创建规则 + 浏览器设置卡
 
 基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`（验证版本 `0.2.2-rc.5`）。

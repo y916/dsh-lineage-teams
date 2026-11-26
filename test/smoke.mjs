@@ -10,7 +10,7 @@
 // Against a scratch build:       DSH_INSTALL_ROOT=/path/to/dsh-install node test/smoke.mjs
 import assert from 'node:assert/strict'
 import { resolve as resolvePath } from 'node:path'
-import { __test, apply } from '../lib/index.mjs'
+import plugin, { __test, apply } from '../lib/index.mjs'
 
 const {
   buildRuleText,
@@ -252,7 +252,8 @@ console.log('ok 1 target merging')
 
   const resolved = Config({})
   assert.deepEqual(normalizeSettings(resolved), DEFAULT_SETTINGS, 'Config defaults match the browser card')
-  console.log('ok 6 settings normalization')
+    assert.equal(plugin.Config, Config, 'the Loader reads the default export, so it must carry Config')
+console.log('ok 6 settings normalization')
 }
 
 // ---------------------------------------------------------------------------
