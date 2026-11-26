@@ -1,3 +1,48 @@
+# 0.4.0：子代理预算（禁用 subagent_fork + 空闲复用规则）
+
+基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`（验证版本 `0.2.2-rc.5`）。
+
+## 改了什么
+
+| 能力 | 实现点 | 作用域 |
+| --- | --- | --- |
+| 全局禁用 `subagent_fork` | 每个 Agent scope 调 `ctx.tools.restrict({ deny: ['subagent_fork'] })` | 该 Agent 及其后代 scope |
+| 兜底拒绝 fork 调用 | 根 context 注册 `ctx.tools.guard`（`tools.guard` 在根上即全局 guard） | 所有 Agent（含 PTC / 直接 dispatch） |
+| `subagent` 新规则 | 每个 Agent scope 注册同名遮蔽定义，描述追加规则原文，`execute` 前置检查 | 该 Agent |
+| 委派提示不被遮蔽吞掉 | `lineage:delegation` section，仅当可见的 `subagent` 是本插件的遮蔽定义时输出 | 该 Agent |
+| 卸载清理 | `ctx.effect` 统一释放本实例注册的工具与 scope 限制 | 插件 fiber |
+
+### 规则原文（写入 `subagent` description）
+
+```text
+如果空闲的子代理数量达到整体的一半及以上，请使用send_message向空闲的子代理派发任务，不允许建立新的子代理。
+```
+
+### 判定口径
+
+- 子代理：调用者直接创建、`mode === 'continuable'` 的子代理；`listDescendants(caller.id)` 里取
+  `kind === 'child' && depth === 1`。不可继续的子代理不计入（`send_message` 无法向它们派发）。
+- 空闲：`ctx.agents.get(id)?.status !== 'running'`；未驻留（冷）的可继续子代理也算空闲。
+- 整体：上述子代理总数。
+- 命中条件：`total > 0 && idle * 2 >= total`；`total === 0` 时始终允许首次派发。
+- 命中直接在 `execute` 抛错，错误里给出 `total / idle`、规则原文与可派发的空闲子代理名字
+  （`entry.path ?? entry.name ?? entry.id`）。
+- 目录读取失败（非取消）时放行并 `logger.warn`，不把「无法判断」变成拒绝；调用被取消时保留取消。
+- 只在 `send_message` 对该 Agent 可见时安装：否则拒绝新建会断掉唯一委派路径。
+
+### 为什么要遮蔽 `subagent`
+
+`defineTool` 产出的定义对象带执行/展示闭包，直接改 `description` 或包 `execute` 会污染上游定义；
+Cordis 的 scoped tool 就近遮蔽才是受支持的做法（与 0.3.0 的 `send_message` 相同）。
+遮蔽会带来一个上游副作用：`tool-subagent` 的 `tool:subagent` section 按定义身份判定，遮蔽后不再输出
+委派建议；本版用 `lineage:delegation` 复述同等内容（去掉 `subagent_fork`）。
+
+### 验证
+
+- `node test/smoke.mjs`（新增 idle 计数、边界、遮蔽描述与拒绝、fork guard、wiring 断言）。
+- 真机：更新 web profile 后确认 `subagent_fork` 不再出现在工具列表、`subagent` 描述含规则原文、
+  直接调用 fork 被 guard 拒绝。
+
 # 0.3.0：从 vendored fork 改为薄增量
 
 基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`（改动起点 `dsh-v0.2.2-rc.2`）。

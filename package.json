@@ -1,9 +1,9 @@
 {
   "name": "@y916/dsh-lineage-teams",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Thin increment over the DSH Agent Teams model (0.2.2-rc.2+): broadcast send_message plus contact/completion guidance for delegated agents.",
+  "description": "Thin increment over the DSH Agent Teams model (0.2.2-rc.2+): broadcast send_message, contact/completion guidance, and a subagent budget that disables subagent_fork and reuses idle subagents instead of spawning.",
   "main": "./lib/index.mjs",
   "files": [
     "lib",
