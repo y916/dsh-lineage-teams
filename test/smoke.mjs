@@ -313,7 +313,7 @@ console.log('ok 6 settings normalization')
       },
     } : undefined),
   }
-  await enrichIdleMembers(ctx, [member], { preset: true, model: true, cwd: true, ratio: 50, count: 3 }, new AbortController().signal)
+  await enrichIdleMembers(ctx, [member], { preset: false, model: false, cwd: true, ratio: 50, count: 3 }, new AbortController().signal)
   assert.deepEqual(member, {
     id: 'cold-1',
     preset: 'doc-assistant',

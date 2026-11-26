@@ -1,6 +1,6 @@
 {
   "name": "@y916/dsh-lineage-teams",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "type": "module",
   "description": "Thin increment over the DSH Agent Teams model (0.2.2-rc.2+): broadcast send_message, contact/completion guidance, a disabled subagent_fork, and configurable subagent-creation rules with a browser settings card.",

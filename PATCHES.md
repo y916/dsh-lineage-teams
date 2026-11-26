@@ -1,3 +1,10 @@
+# 0.5.2：失败信息补齐冷子代理元数据
+
+基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`。
+
+只要任一差异豁免开启且需要读取冷子代理，`enrichIdleMembers` 就把同一次观察拿到的预设、cwd、provider/model
+全部填上；只有“开启的维度”参与放行判定，失败信息不再把已读到的值显示成“未知”。
+
 # 0.5.1：修正设置命名空间的注册
 
 基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`。
