@@ -1,12 +1,13 @@
 {
   "name": "@y916/dsh-lineage-teams",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
-  "description": "Thin increment over the DSH Agent Teams model (0.2.2-rc.2+): broadcast send_message, contact/completion guidance, and a subagent budget that disables subagent_fork and reuses idle subagents instead of spawning.",
+  "description": "Thin increment over the DSH Agent Teams model (0.2.2-rc.2+): broadcast send_message, contact/completion guidance, a disabled subagent_fork, and configurable subagent-creation rules with a browser settings card.",
   "main": "./lib/index.mjs",
   "files": [
     "lib",
+    "client.js",
     "cordis.patch.yml",
     "README.md",
     "PATCHES.md"
@@ -22,10 +23,14 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
     }
   },
   "exports": {
     ".": "./lib/index.mjs",
+    "./client": "./client.js",
     "./package.json": "./package.json"
   }
 }

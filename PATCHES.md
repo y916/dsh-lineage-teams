@@ -1,3 +1,49 @@
+# 0.5.0：可配置的子代理创建规则 + 浏览器设置卡
+
+基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`（验证版本 `0.2.2-rc.5`）。
+
+## 改了什么
+
+| 能力 | 实现点 |
+| --- | --- |
+| `subagent` 描述改为固定指令 | 追加「在调用此工具之前，先调用list_agents确认子代理情况，优先使用send_message向空闲的子代理派发任务，而不是建立新的子代理。」 |
+| 两个可配置上限 | `Config.idleRatioLimit`（0–100，默认 50）与 `Config.idleCountLimit`（0–10，默认 3），**必须同时满足**才允许新建；比较为含等号（`idle*100 <= total*ratio`、`idle <= count`） |
+| 三个差异豁免 | `allowDifferentPreset` / `allowDifferentModel` / `allowDifferentCwd`（默认全关）：只在超过两个上限时生效；命中条件是对应请求值**显式给出**且空闲代理中确实没有 |
+| 冷子代理元数据 | 驻留的空闲代理读 live Agent；冷代理从 `sessionQuery` 观察 header（`agentPreset`、`cwd`）与 `subagent/descriptor`（provider/model）；读不到就不授予该维度豁免（保守） |
+| 规则上下文 | `lineage:subagent-rule` system prompt context：当前数值 + 计数口径 + 豁免状态；每步重新组装，设置变化后的下一步加一行「（子代理创建规则已更新，以下为当前规则）」 |
+| 浏览器设置卡 | `client.js`（`dsh.client`，无构建）注册 `plugins.bundle.config`（key 为 bundle 名）与 `plugins.row.config`（key `@y916/dsh-lineage-teams#lineage-teams`），用 `configForms` 读写 `lineage-teams` 命名空间；2 滑动条 + 3 开关 + 保存/恢复默认 |
+| 热生效 | 5 个 Config 字段全部 `volatile()`：保存后同一插件实例内即时生效，无需重启或重开对话 |
+
+## 判定顺序
+
+1. 统计调用者**直接创建、continuable** 的子代理（`depth === 1`），空闲 = 状态不是 `running`。
+2. `total === 0` 或两个上限同时满足 → 允许。
+3. 否则，任一**开启**的豁免维度满足「请求值显式给出 + 空闲代理中没有该值」→ 允许。
+4. 否则拒绝，错误里给出失败的上限、当前计数、三个豁免的判定与空闲代理清单。
+5. 读不到子代理目录（非取消）时放行并 warning；调用被取消时保留取消。
+
+豁免的值比较：预设取 `session.header.agentPreset`；模型只比较 `provider + model`（`reasoning_effort` 不参与）；
+目录取当前工作目录（`workingDirectory` 服务，回退 header）。省略的参数不触发豁免。
+
+## 为什么用 volatile Config
+
+设置要能“保存后下一步生效”，而且不能因为改一个数字就重挂插件、重建所有 Agent 的遮蔽定义。
+Schemastery 的 `volatile()` 字段由 Loader 原地更新，插件在每次 `subagent` 调用与每次 system prompt
+组装时读取 `.get()`，所以规则与上下文始终是当前值；`dsh-settings` 会把该行暴露成 `lineage-teams`
+命名空间，浏览器卡通过 `configForms` 写 user 层。
+
+## 客户端半体
+
+`client.js` 是 `window.__ModuleLoader__.load` 工厂，`require('react')`，无构建步骤；`dsh.client.platform`
+为 `web`。卡片同时注册到 bundle 详情页与行配置子页；非 Web 环境没有这张卡，Host 规则仍按默认值运行。
+
+## 验证
+
+- `node test/smoke.mjs`：设置归一化、两个上限边界、三种豁免（命中/未命中/未知）、显式参数、
+  冷元数据补读、拒绝文案、规则上下文与更新标记、遮蔽定义执行路径、fork guard、遗留定义识别。
+- 真机：更新 web profile 后确认设置卡出现、滑动条/开关可写、保存后 `subagent` 错误里的数值与
+  规则上下文同步变化。
+
 # 0.4.0：子代理预算（禁用 subagent_fork + 空闲复用规则）
 
 基线：`deepseek-ai/deepseek-harness` @ `dsh-v0.2.2-rc.5`（验证版本 `0.2.2-rc.5`）。
